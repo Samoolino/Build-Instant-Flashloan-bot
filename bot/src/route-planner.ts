@@ -40,6 +40,8 @@ export type RouteCandidate = {
   repaymentAmount: bigint;
   planHash: string;
   simulationPassed: boolean;
+  /** True only when all cost inputs were obtained from an explicitly verified source. */
+  economicInputsVerified: boolean;
   legs: RouteLeg[];
 };
 
@@ -56,6 +58,7 @@ export type PlannerPolicy = {
   requireSimulation?: boolean;
   requirePlanHash?: boolean;
   requireRepayment?: boolean;
+  requireVerifiedEconomics?: boolean;
 };
 
 const DEFAULT_POLICY: Required<PlannerPolicy> = {
@@ -63,6 +66,7 @@ const DEFAULT_POLICY: Required<PlannerPolicy> = {
   requireSimulation: true,
   requirePlanHash: true,
   requireRepayment: true,
+  requireVerifiedEconomics: true,
 };
 
 function usdMicroToNumber(usdMicro: bigint): number {
@@ -87,6 +91,9 @@ export function planRoute(candidate: RouteCandidate, policy: PlannerPolicy = {})
   if (effective.requireSimulation && !candidate.simulationPassed) throw new Error("SIMULATION_REQUIRED");
   if (effective.requirePlanHash && candidate.planHash.length === 0) throw new Error("PLAN_HASH_REQUIRED");
   if (effective.requireRepayment && candidate.repaymentAmount < candidate.loanAmount) throw new Error("REPAYMENT_UNSAFE");
+  if (effective.requireVerifiedEconomics && !candidate.economicInputsVerified) {
+    throw new Error("VERIFIED_ECONOMICS_REQUIRED");
+  }
   if (candidate.finalAmount < candidate.repaymentAmount) throw new Error("INSUFFICIENT_FINAL_BALANCE");
 
   const grossProfitToken = candidate.finalAmount - candidate.loanAmount;
