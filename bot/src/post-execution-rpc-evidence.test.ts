@@ -56,6 +56,6 @@ test("collects receipt logs and final balance from the receipt block", async () 
 test("rejects an RPC final balance below repayment", async () => {
   await assert.rejects(
     () => collectPostExecutionEvidenceFromRpc(makeRpc(1000n), record, tx, target, lender, executor),
-    /FINAL_BALANCE_BELOW_REPAYMENT/,
+    /REPAYMENT_NOT_COVERED/,
   );
 });
