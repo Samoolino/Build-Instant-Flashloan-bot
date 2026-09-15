@@ -7,11 +7,11 @@ test("RPC transport requires an environment-backed endpoint", () => {
 });
 
 test("latest block number is parsed as bigint", async () => {
-  const rpc: RpcTransport = { request: async () => "0x10" };
+  const rpc: RpcTransport = { request: async <T>(_method: string, _params: readonly unknown[] = []) => "0x10" as T };
   assert.equal(await getLatestBlockNumber(rpc), 16n);
 });
 
 test("invalid block responses are rejected", async () => {
-  const rpc: RpcTransport = { request: async () => "latest" };
+  const rpc: RpcTransport = { request: async <T>(_method: string, _params: readonly unknown[] = []) => "latest" as T };
   await assert.rejects(() => getLatestBlockNumber(rpc), /RPC_BLOCK_NUMBER_INVALID/);
 });
