@@ -12,23 +12,24 @@ export function evaluateNetProfitUsd(netProfitUsd: number): ProfitabilityDecisio
   return { eligible: true, reason: netProfitUsd >= TARGET_PROFIT_USD ? "TARGET_REACHED" : "ABOVE_HARD_FLOOR" };
 }
 
-/**
- * Converts a USD profit floor into token base units without floating-point arithmetic.
- * The result is rounded up so the on-chain minimum cannot be weaker than the USD policy.
- */
+function toMicrounits(value: number, error: string): bigint {
+  if (!Number.isFinite(value) || value < 0) throw new Error(error);
+  const scaled = Math.round(value * 1_000_000);
+  if (!Number.isSafeInteger(scaled)) throw new Error("USD_CONVERSION_REQUIRES_HIGH_PRECISION_INPUT");
+  return BigInt(scaled);
+}
+
+/** Converts a USD floor into token base units, rounding up conservatively. */
 export function usdFloorToTokenUnits(
   minimumUsd: number,
   tokenUsdPrice: number,
   decimals: number,
 ): bigint {
-  if (!Number.isFinite(minimumUsd) || minimumUsd < 0) throw new Error("INVALID_MINIMUM_USD");
-  if (!Number.isFinite(tokenUsdPrice) || tokenUsdPrice <= 0) throw new Error("INVALID_TOKEN_USD_PRICE");
   if (!Number.isInteger(decimals) || decimals < 0 || decimals > 255) throw new Error("INVALID_TOKEN_DECIMALS");
+  const usdMicro = toMicrounits(minimumUsd, "INVALID_MINIMUM_USD");
+  const priceMicro = toMicrounits(tokenUsdPrice, "INVALID_TOKEN_USD_PRICE");
+  if (priceMicro === 0n) throw new Error("INVALID_TOKEN_USD_PRICE");
 
-  const unitsPerToken = 10 ** decimals;
-  const rawUnits = (minimumUsd / tokenUsdPrice) * unitsPerToken;
-  if (!Number.isFinite(rawUnits) || rawUnits > Number.MAX_SAFE_INTEGER) {
-    throw new Error("USD_CONVERSION_REQUIRES_HIGH_PRECISION_INPUT");
-  }
-  return BigInt(Math.ceil(rawUnits));
+  const baseUnits = 10n ** BigInt(decimals);
+  return (usdMicro * baseUnits + priceMicro - 1n) / priceMicro;
 }
