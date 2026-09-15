@@ -32,6 +32,9 @@ jobs:
             exit 1
           fi
           echo "ETH_RPC_URL is configured; endpoint value is intentionally not printed."
-      - name: Run Ethereum Aave callback fork test
+      - name: Run Aave callback fork test
         working-directory: contracts
         run: forge test --match-contract AaveFlashLoanCallbackForkTest --match-test testEthereumForkAaveFlashLoanCallback -vv
+      - name: Run complete two-leg executor fork test
+        working-directory: contracts
+        run: forge test --match-contract AaveFlashArbExecutorForkTest --match-test testEthereumForkTwoLegAtomicExecutor -vv
