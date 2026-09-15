@@ -10,9 +10,12 @@ export type UniswapV3QuoteConfig = {
   rpcEnvVar?: string;
   sourceId?: string;
   maxQuoteAgeMs?: number;
-  gasCostUsd?: number;
-  lenderPremiumUsd?: number;
-  slippageUsd?: number;
+  /** Required, independently verified total route gas cost in USD. */
+  gasCostUsd: number;
+  /** Required, independently verified lender premium cost in USD. */
+  lenderPremiumUsd: number;
+  /** Required, independently verified slippage reserve in USD. */
+  slippageUsd: number;
 };
 
 const QUOTE_EXACT_INPUT_SINGLE_SELECTOR = "0xc6a5026a";
@@ -31,6 +34,13 @@ function uintWord(value: bigint): string {
 function feeWord(fee: number): string {
   if (!Number.isInteger(fee) || fee < 0 || fee > 0xffffff) throw new Error("INVALID_UNISWAP_V3_FEE");
   return uintWord(BigInt(fee));
+}
+
+function validateUsdCost(value: number, error: string): number {
+  if (!Number.isFinite(value) || value < 0) throw new Error(error);
+  const micro = Math.round(value * 1_000_000);
+  if (!Number.isSafeInteger(micro)) throw new Error("USD_COST_REQUIRES_HIGH_PRECISION_INPUT");
+  return micro / 1_000_000;
 }
 
 function parseAmountOut(result: string): bigint {
@@ -53,9 +63,9 @@ export function createUniswapV3QuoteProvider(
   const transport = rpc ?? createJsonRpcTransport({ sourceId: `${config.chainId}:uniswap-v3`, rpcEnvVar }, env);
   const sourceId = config.sourceId?.trim() || `uniswap-v3-quoter-v2:${config.chainId}`;
   const maxQuoteAgeMs = config.maxQuoteAgeMs ?? 5_000;
-  const gasCostUsd = config.gasCostUsd ?? 0;
-  const lenderPremiumUsd = config.lenderPremiumUsd ?? 0;
-  const slippageUsd = config.slippageUsd ?? 0;
+  const gasCostUsd = validateUsdCost(config.gasCostUsd, "ECONOMIC_GAS_COST_REQUIRED");
+  const lenderPremiumUsd = validateUsdCost(config.lenderPremiumUsd, "ECONOMIC_LENDER_PREMIUM_REQUIRED");
+  const slippageUsd = validateUsdCost(config.slippageUsd, "ECONOMIC_SLIPPAGE_RESERVE_REQUIRED");
 
   return {
     async quote(request: QuoteRequest): Promise<FreshQuote> {
