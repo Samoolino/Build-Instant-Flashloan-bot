@@ -35,7 +35,9 @@ test("accepts a simulated route above the $2 hard floor", () => {
 });
 
 test("enforces a caller-supplied minimum profit policy", () => {
-  assert.throws(() => planRoute(baseCandidate, { minimumNetProfitUsd: 4 }), /./);
+  const belowPolicy = planRoute(baseCandidate, { minimumNetProfitUsd: 4 });
+  assert.equal(belowPolicy.decision.eligible, false);
+  assert.equal(belowPolicy.decision.reason, "BELOW_HARD_FLOOR");
   const planned = planRoute(baseCandidate, { minimumNetProfitUsd: 1 });
   assert.equal(planned.decision.eligible, true);
   assert.equal(planned.minimumProfitTokenUnits, 400_000_000_000_000n);
@@ -57,7 +59,7 @@ test("preserves token-unit precision for large base-unit balances", () => {
   const planned = planRoute({
     ...baseCandidate,
     loanAmount: 1_000_000_000_000_000_000_000_000_000_000n,
-    finalAmount: 1_000_000_000_000_000_000_000_000_000_800n,
+    finalAmount: 1_000_000_000_000_000_000_000_001_180_000_000_000_000n,
   });
   assert.equal(planned.netProfitUsd, 1.8);
 });
