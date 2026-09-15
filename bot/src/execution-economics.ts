@@ -1,5 +1,6 @@
 import type { RpcTransport } from "./rpc-client.js";
-import type { RouteCandidate } from "./route-planner.js";
+import type { RouteCandidate, PlannedRoute, PlannerPolicy } from "./route-planner.js";
+import { planRoute } from "./route-planner.js";
 
 export type GasEstimateRequest = {
   from: string;
@@ -9,7 +10,6 @@ export type GasEstimateRequest = {
 };
 
 export type ExecutableRouteContext = GasEstimateRequest & {
-  /** Marks calldata as the complete executor/route transaction, not a quote call. */
   kind: "ROUTE_EXECUTION";
 };
 
@@ -76,7 +76,6 @@ export async function estimateExecutionEconomics(
   return { gasLimit, gasPriceWei, nativeCostWei, nativeUsdPrice, gasCostUsd };
 }
 
-/** Replaces a provisional planner gas cost with the estimate for the complete executable route. */
 export async function applyExecutionEconomics(
   candidate: RouteCandidate,
   rpc: RpcTransport,
@@ -86,4 +85,16 @@ export async function applyExecutionEconomics(
   if (route.kind !== "ROUTE_EXECUTION") throw new Error("ROUTE_EXECUTION_CONTEXT_REQUIRED");
   const economics = await estimateExecutionEconomics(rpc, route, nativeUsdPrice);
   return { ...candidate, gasCostUsd: economics.gasCostUsd };
+}
+
+/** Estimates complete-route gas before applying profitability and simulation policy. */
+export async function planRouteWithExecutionEconomics(
+  candidate: RouteCandidate,
+  rpc: RpcTransport,
+  route: ExecutableRouteContext,
+  nativeUsdPrice: number,
+  policy: PlannerPolicy = {},
+): Promise<PlannedRoute> {
+  const updatedCandidate = await applyExecutionEconomics(candidate, rpc, route, nativeUsdPrice);
+  return planRoute(updatedCandidate, policy);
 }
