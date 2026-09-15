@@ -8,7 +8,8 @@ export type AavePremium = {
   sourceId: string;
 };
 
-const SELECTOR = "0x3b7b6c8e";
+// bytes4(keccak256("FLASHLOAN_PREMIUM_TOTAL()"))
+const SELECTOR = "0x074b2e43";
 
 function address(value: string): void {
   if (!/^0x[0-9a-fA-F]{40}$/.test(value)) throw new Error("INVALID_AAVE_POOL_ADDRESS");
@@ -28,7 +29,10 @@ export async function readAaveV3FlashLoanPremium(
 ): Promise<AavePremium> {
   address(poolAddress);
   if (blockNumber < 0n) throw new Error("INVALID_AAVE_PREMIUM_BLOCK");
-  const result = await rpc.request<string>("eth_call", [{ to: poolAddress, data: SELECTOR }, `0x${blockNumber.toString(16)}`]);
+  const result = await rpc.request<string>(
+    "eth_call",
+    [{ to: poolAddress, data: SELECTOR }, `0x${blockNumber.toString(16)}`],
+  );
   const premiumBps = quantity(result, "AAVE_PREMIUM_RESULT_INVALID");
   if (premiumBps > 10_000n) throw new Error("AAVE_PREMIUM_OUT_OF_RANGE");
   return {
