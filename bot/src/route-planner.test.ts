@@ -56,10 +56,12 @@ test("rejects unsupported canonical chains", () => {
 });
 
 test("preserves token-unit precision for large base-unit balances", () => {
+  const loanAmount = 1_000_000_000_000_000_000_000_000_000_000n;
   const planned = planRoute({
     ...baseCandidate,
-    loanAmount: 1_000_000_000_000_000_000_000_000_000_000n,
-    finalAmount: 1_000_000_000_000_000_000_000_001_180_000_000_000_000n,
+    loanAmount,
+    finalAmount: loanAmount + 1_180_000_000_000_000n,
+    repaymentAmount: loanAmount,
   });
   assert.equal(planned.netProfitUsd, 1.8);
 });
