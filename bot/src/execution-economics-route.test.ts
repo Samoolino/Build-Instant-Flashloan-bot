@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { applyExecutionEconomics, type ExecutableRouteContext } from "./execution-economics.js";
+import { applyExecutionEconomics, planRouteWithExecutionEconomics, type ExecutableRouteContext } from "./execution-economics.js";
 import type { RpcTransport } from "./rpc-client.js";
 import type { RouteCandidate } from "./route-planner.js";
 
@@ -44,7 +44,7 @@ test("applies gas economics from complete route calldata", async () => {
   assert.equal(updated.gasCostUsd < candidate.gasCostUsd, true);
 });
 
-test("rejects a missing native-token USD price before RPC", async () => {
+test("requires a valid native-token USD price before RPC", async () => {
   await assert.rejects(
     applyExecutionEconomics(candidate, mockRpc(), route, 0),
     /INVALID_NATIVE_USD_PRICE/,
@@ -64,5 +64,12 @@ test("passes exact route calldata to eth_estimateGas", async () => {
     },
   };
   await applyExecutionEconomics(candidate, rpc, route, 2500);
-  assert.deepEqual(observed, [{ from: route.from, to: route.to, data: route.data }]);
+  assert.deepEqual(observed, [[{ from: route.from, to: route.to, data: route.data }]]);
+});
+
+test("feeds complete-route gas cost into the profitability planner", async () => {
+  const planned = await planRouteWithExecutionEconomics(candidate, mockRpc(), route, 2500);
+  assert.equal(planned.candidate.gasCostUsd, 0.0525);
+  assert.equal(planned.netProfitUsd, 24.9475);
+  assert.equal(planned.decision.eligible, true);
 });
