@@ -18,7 +18,14 @@ const candidate: RouteCandidate = {
   repaymentAmount: 1_000_000n,
   planHash: "0xplan",
   simulationPassed: true,
-  legs: [],
+  legs: [{
+    chainId: 1,
+    tokenIn: "0x0000000000000000000000000000000000000001",
+    tokenOut: "0x0000000000000000000000000000000000000002",
+    amountIn: 1_000_000n,
+    minimumAmountOut: 1n,
+    quoteSource: "test",
+  }],
 };
 
 function mockRpc(): RpcTransport {
