@@ -65,6 +65,19 @@ const DEFAULT_POLICY: Required<PlannerPolicy> = {
   requireRepayment: true,
 };
 
+function usdMicroToNumber(usdMicro: bigint): number {
+  const value = Number(usdMicro) / 1_000_000;
+  if (!Number.isFinite(value)) throw new Error("USD_PROFIT_OUT_OF_RANGE");
+  return value;
+}
+
+function costUsdMicro(value: number, error: string): bigint {
+  if (!Number.isFinite(value) || value < 0) throw new Error(error);
+  const scaled = Math.round(value * 1_000_000);
+  if (!Number.isSafeInteger(scaled)) throw new Error("USD_COST_REQUIRES_HIGH_PRECISION_INPUT");
+  return BigInt(scaled);
+}
+
 /** Builds a non-signing route decision from verified quote/simulation data. */
 export function planRoute(candidate: RouteCandidate, policy: PlannerPolicy = {}): PlannedRoute {
   const effective = { ...DEFAULT_POLICY, ...policy };
@@ -77,14 +90,17 @@ export function planRoute(candidate: RouteCandidate, policy: PlannerPolicy = {})
   if (candidate.finalAmount < candidate.repaymentAmount) throw new Error("INSUFFICIENT_FINAL_BALANCE");
 
   const grossProfitToken = candidate.finalAmount - candidate.loanAmount;
-  const grossProfitUsd = Number(grossProfitToken) / 10 ** candidate.tokenDecimals * candidate.tokenUsdPrice;
-  const netProfitUsd = grossProfitUsd
-    - candidate.lenderPremiumUsd
-    - candidate.gasCostUsd
-    - candidate.swapFeesUsd
-    - candidate.slippageUsd;
+  const baseUnits = 10n ** BigInt(candidate.tokenDecimals);
+  const tokenPriceMicro = costUsdMicro(candidate.tokenUsdPrice, "INVALID_TOKEN_USD_PRICE");
+  if (tokenPriceMicro === 0n) throw new Error("INVALID_TOKEN_USD_PRICE");
+  const grossProfitUsdMicro = (grossProfitToken * tokenPriceMicro) / baseUnits;
+  const totalCostUsdMicro = costUsdMicro(candidate.lenderPremiumUsd, "INVALID_LENDER_PREMIUM_USD")
+    + costUsdMicro(candidate.gasCostUsd, "INVALID_GAS_COST_USD")
+    + costUsdMicro(candidate.swapFeesUsd, "INVALID_SWAP_FEES_USD")
+    + costUsdMicro(candidate.slippageUsd, "INVALID_SLIPPAGE_USD");
+  const netProfitUsd = usdMicroToNumber(grossProfitUsdMicro - totalCostUsdMicro);
 
-  const decision = evaluateNetProfitUsd(netProfitUsd);
+  const decision = evaluateNetProfitUsd(netProfitUsd, effective.minimumNetProfitUsd);
   const minimumProfitTokenUnits = usdFloorToTokenUnits(
     effective.minimumNetProfitUsd,
     candidate.tokenUsdPrice,
