@@ -1,0 +1,37 @@
+name: Ethereum Fork Verification
+
+on:
+  workflow_dispatch:
+
+jobs:
+  ethereum-fork:
+    runs-on: ubuntu-latest
+    env:
+      EXECUTION_AUTHORIZATION: '0'
+      AUTHORIZATION_STATE: LOCKED
+      LIVE_SIGNING: 'false'
+      BROADCAST_ENABLED: 'false'
+      TRANSACTION_SIGNED: 'false'
+      TRANSACTION_BROADCAST: 'false'
+      LIVE_EXECUTION_READY: 'false'
+      ETH_RPC_URL: ${{ secrets.ETH_RPC_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: foundry-rs/foundry-toolchain@v1
+      - name: Verify locked state
+        run: node scripts/verify-locked-state.mjs
+      - name: Require Ethereum RPC secret
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "${ETH_RPC_URL}" ]]; then
+            echo "ETH_RPC_URL GitHub Actions secret is required for fork verification."
+            exit 1
+          fi
+          echo "ETH_RPC_URL is configured; endpoint value is intentionally not printed."
+      - name: Run Ethereum Aave callback fork test
+        working-directory: contracts
+        run: forge test --match-contract AaveFlashLoanCallbackForkTest --match-test testEthereumForkAaveFlashLoanCallback -vv
