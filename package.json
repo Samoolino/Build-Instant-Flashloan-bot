@@ -1,0 +1,19 @@
+{
+  "name": "build-instant-flashloan-bot",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Institutional flash-loan and arbitrage execution workspace",
+  "scripts": {
+    "build": "npm run build:contracts && npm run build:bot && npm run build:dashboard",
+    "build:contracts": "forge build",
+    "build:bot": "npm --prefix bot run build",
+    "build:dashboard": "npm --prefix dapp-dashboard run build",
+    "test": "forge test",
+    "test:bot": "npm --prefix bot test",
+    "test:dashboard": "npm --prefix dapp-dashboard test",
+    "verify:locked-state": "node scripts/verify-locked-state.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
