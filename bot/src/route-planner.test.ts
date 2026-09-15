@@ -16,6 +16,7 @@ const baseCandidate: RouteCandidate = {
   repaymentAmount: 1_000_000_000_000_000_000n,
   planHash: "0xabc",
   simulationPassed: true,
+  economicInputsVerified: true,
   legs: [{
     chainId: 1,
     tokenIn: "0x0000000000000000000000000000000000000001",
@@ -53,6 +54,15 @@ test("rejects a route that cannot repay the lender", () => {
 
 test("rejects unsupported canonical chains", () => {
   assert.throws(() => planRoute({ ...baseCandidate, chainId: 999999 }), /UNSUPPORTED_CANONICAL_CHAIN/);
+});
+
+test("rejects routes whose economics were not verified", () => {
+  assert.throws(() => planRoute({ ...baseCandidate, economicInputsVerified: false }), /VERIFIED_ECONOMICS_REQUIRED/);
+});
+
+test("allows explicitly disabling the verified-economics gate for controlled simulations", () => {
+  const planned = planRoute({ ...baseCandidate, economicInputsVerified: false }, { requireVerifiedEconomics: false });
+  assert.equal(planned.decision.eligible, true);
 });
 
 test("preserves token-unit precision for large base-unit balances", () => {
