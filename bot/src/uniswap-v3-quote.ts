@@ -7,6 +7,7 @@ export type UniswapV3QuoteConfig = {
   chainId: number;
   quoterAddress: string;
   fee: number;
+  rpcEnvVar?: string;
   sourceId?: string;
   maxQuoteAgeMs?: number;
   gasCostUsd?: number;
@@ -41,17 +42,15 @@ function buildQuoteCalldata(request: QuoteRequest, fee: number): string {
   return `${QUOTE_EXACT_INPUT_SINGLE_SELECTOR}${addressWord(request.tokenIn)}${addressWord(request.tokenOut)}${uintWord(request.amountIn)}${feeWord(fee)}${uintWord(ZERO_SQRT_PRICE_LIMIT)}`;
 }
 
-/**
- * Reads a real Uniswap V3 QuoterV2 quote through the configured chain RPC.
- * The adapter is quote-only: it does not sign, submit, or broadcast transactions.
- */
+/** Reads a real Uniswap V3 QuoterV2 quote; it never signs or broadcasts. */
 export function createUniswapV3QuoteProvider(
   config: UniswapV3QuoteConfig,
   env: NodeJS.ProcessEnv = process.env,
   rpc?: RpcTransport,
 ) {
   if (!/^0x[0-9a-fA-F]{40}$/.test(config.quoterAddress)) throw new Error("INVALID_UNISWAP_QUOTER_ADDRESS");
-  const transport = rpc ?? createJsonRpcTransport({ sourceId: `${config.chainId}:uniswap-v3`, rpcEnvVar: "ETH_RPC_URL" }, env);
+  const rpcEnvVar = config.rpcEnvVar ?? "ETH_RPC_URL";
+  const transport = rpc ?? createJsonRpcTransport({ sourceId: `${config.chainId}:uniswap-v3`, rpcEnvVar }, env);
   const sourceId = config.sourceId?.trim() || `uniswap-v3-quoter-v2:${config.chainId}`;
   const maxQuoteAgeMs = config.maxQuoteAgeMs ?? 5_000;
   const gasCostUsd = config.gasCostUsd ?? 0;
@@ -69,7 +68,7 @@ export function createUniswapV3QuoteProvider(
         `0x${state.blockNumber.toString(16)}`,
       ]);
       const amountOut = parseAmountOut(result);
-      const quote: FreshQuote = {
+      return {
         amountOut,
         gasCostUsd,
         lenderPremiumUsd,
@@ -81,7 +80,6 @@ export function createUniswapV3QuoteProvider(
         expiresAtMs: quotedAtMs + maxQuoteAgeMs,
         blockNumber: state.blockNumber,
       };
-      return quote;
     },
   };
 }
