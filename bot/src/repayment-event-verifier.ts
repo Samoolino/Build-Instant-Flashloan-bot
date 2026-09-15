@@ -18,6 +18,9 @@ export type RepaymentEventEvidence = {
   verified: true;
 };
 
+/** Backward-compatible alias for the immutable audit-record interface. */
+export type RepaymentEventLog = RepaymentEventEvidence;
+
 const TRANSFER_TOPIC = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a8df523b3ef";
 
 function address(value: string, error: string): void {
