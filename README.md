@@ -58,6 +58,14 @@ TARGET_PROFIT_IS_ADVISORY=true
 
 A candidate below the $2 USD net-profit floor must be rejected. The $100 target is advisory and does not override the hard floor.
 
+## Ethereum fork verification
+
+The repository contains an explicit fork-only Aave V3 callback test at `contracts/test/AaveFlashLoanCallbackFork.t.sol`. It requires an Ethereum JSON-RPC endpoint through `ETH_RPC_URL`, creates a local Foundry fork, and does not broadcast to Ethereum mainnet.
+
+For reproducible remote verification, the `Ethereum Fork Verification` workflow is manually dispatched and reads the endpoint only from the GitHub Actions secret named `ETH_RPC_URL`. The secret value is never printed or committed. Configure the supplied Ethereum JSON-RPC endpoint as that secret before dispatching the workflow.
+
+A green normal CI run proves build/tests against the repository's deterministic test environment. It does **not** by itself prove that an Ethereum fork was executed. Fork verification is only marked verified after the dedicated fork workflow completes successfully with the RPC secret configured.
+
 ## Development state
 
 The complete local implementation may contain additional generated execution-state artifacts under `state/`. Those artifacts must remain locked to simulation/review until an explicit future authorization boundary is satisfied.
