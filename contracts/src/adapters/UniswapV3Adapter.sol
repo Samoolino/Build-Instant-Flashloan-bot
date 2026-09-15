@@ -15,11 +15,11 @@ interface ISwapRouterV3Minimal {
         uint256 amountOutMinimum;
         uint160 sqrtPriceLimitX96;
     }
-
     function exactInputSingle(ExactInputSingleParams calldata params) external returns (uint256 amountOut);
 }
 
 contract UniswapV3Adapter is IDexAdapter {
+    address public immutable executor;
     error UnauthorizedCaller();
     error InvalidAmountOut();
 
@@ -27,6 +27,11 @@ contract UniswapV3Adapter is IDexAdapter {
         uint24 fee;
         uint256 deadline;
         uint160 sqrtPriceLimitX96;
+    }
+
+    constructor(address executor_) {
+        require(executor_ != address(0), "EXECUTOR_ZERO");
+        executor = executor_;
     }
 
     function swap(
@@ -37,10 +42,10 @@ contract UniswapV3Adapter is IDexAdapter {
         uint256 minimumAmountOut,
         bytes calldata data
     ) external returns (SwapResult memory result) {
-        if (msg.sender == address(0)) revert UnauthorizedCaller();
+        if (msg.sender != executor) revert UnauthorizedCaller();
         SwapData memory decoded = abi.decode(data, (SwapData));
-
-        require(IERC20Minimal(tokenIn).transferFrom(msg.sender, address(this), amountIn), "TRANSFER_IN");
+        require(decoded.deadline >= block.timestamp, "EXPIRED");
+        require(IERC20Minimal(tokenIn).transferFrom(executor, address(this), amountIn), "TRANSFER_IN");
         require(IERC20Minimal(tokenIn).approve(router, amountIn), "APPROVE");
 
         uint256 beforeOut = IERC20Minimal(tokenOut).balanceOf(address(this));
@@ -59,7 +64,7 @@ contract UniswapV3Adapter is IDexAdapter {
         uint256 afterOut = IERC20Minimal(tokenOut).balanceOf(address(this));
         uint256 delta = afterOut - beforeOut;
         if (delta < minimumAmountOut || quoted < minimumAmountOut) revert InvalidAmountOut();
-        require(IERC20Minimal(tokenOut).transfer(msg.sender, delta), "TRANSFER_OUT");
+        require(IERC20Minimal(tokenOut).transfer(executor, delta), "TRANSFER_OUT");
         result = SwapResult(delta);
     }
 }
