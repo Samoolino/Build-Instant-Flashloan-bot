@@ -1,0 +1,13 @@
+{
+  "name": "flashloan-bot-engine",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc --noEmit",
+    "test": "node --test"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.0"
+  }
+}
