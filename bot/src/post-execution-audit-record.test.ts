@@ -64,3 +64,4 @@ test("rejects correlation from a different observation", () => {
 test("rejects correlation for a different transaction", () => {
   assert.throws(() => createPostExecutionAuditRecord(record, accounting, repayment, { ...correlation, transactionHash: "0x" + "c".repeat(64) }), /AUDIT_CORRELATION_TRANSACTION_MISMATCH/);
 });
+
