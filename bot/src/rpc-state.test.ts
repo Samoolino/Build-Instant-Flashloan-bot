@@ -3,7 +3,7 @@ import test from "node:test";
 import { readChainState } from "./rpc-state.js";
 
 const rpc = {
-  async request<T>(method: string): Promise<T> {
+  async request<T>(method: string, _params: readonly unknown[] = []): Promise<T> {
     if (method === "eth_blockNumber") return "0x10" as T;
     if (method === "eth_getBlockByNumber") return { timestamp: "0x65" } as T;
     throw new Error(`UNEXPECTED_METHOD:${method}`);
@@ -23,7 +23,7 @@ test("rejects an unsupported canonical network", async () => {
 
 test("requires a block timestamp", async () => {
   const missingTimestampRpc = {
-    async request<T>(method: string): Promise<T> {
+    async request<T>(method: string, _params: readonly unknown[] = []): Promise<T> {
       if (method === "eth_blockNumber") return "0x10" as T;
       return {} as T;
     },
