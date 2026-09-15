@@ -1,0 +1,27 @@
+node_modules/
+.next/
+out/
+dist/
+coverage/
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.seed
+*.secret
+keystore/
+.keystore/
+.foundry/
+cache/
+broadcast/
+
+# Local execution artifacts
+state/local/
+state/runtime/
+state/secrets/
+
+# OS/editor
+.DS_Store
+.vscode/
+.idea/
