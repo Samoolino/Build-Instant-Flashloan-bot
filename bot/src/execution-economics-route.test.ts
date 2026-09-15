@@ -44,15 +44,15 @@ test("applies gas economics from complete route calldata", async () => {
   assert.equal(updated.gasCostUsd < candidate.gasCostUsd, true);
 });
 
-test("requires explicit complete-route context", async () => {
+test("rejects a missing native-token USD price before RPC", async () => {
   await assert.rejects(
-    applyExecutionEconomics(candidate, mockRpc(), { ...route, kind: "ROUTE_EXECUTION" }, 2500),
-    /UNEXPECTED_RPC/,
+    applyExecutionEconomics(candidate, mockRpc(), route, 0),
+    /INVALID_NATIVE_USD_PRICE/,
   );
 });
 
-test("passes exact calldata to eth_estimateGas", async () => {
-  let observed: unknown;
+test("passes exact route calldata to eth_estimateGas", async () => {
+  let observed: readonly unknown[] | undefined;
   const rpc: RpcTransport = {
     async request<T>(method: string, params: readonly unknown[]): Promise<T> {
       if (method === "eth_estimateGas") {
@@ -64,5 +64,5 @@ test("passes exact calldata to eth_estimateGas", async () => {
     },
   };
   await applyExecutionEconomics(candidate, rpc, route, 2500);
-  assert.deepEqual(observed, [[{ from: route.from, to: route.to, data: route.data }]]);
+  assert.deepEqual(observed, [{ from: route.from, to: route.to, data: route.data }]);
 });
