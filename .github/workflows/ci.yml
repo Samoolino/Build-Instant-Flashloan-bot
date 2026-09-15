@@ -37,3 +37,4 @@ jobs:
         run: npm --prefix dapp-dashboard install --no-audit --no-fund
       - name: Dashboard build
         run: npm --prefix dapp-dashboard run build
+      # CI verification intentionally preserves the locked execution boundary.
