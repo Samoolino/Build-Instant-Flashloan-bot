@@ -5,6 +5,7 @@ import { createUniswapV3QuoteProvider } from "./uniswap-v3-quote.js";
 const quoter = "0x1111111111111111111111111111111111111111";
 const tokenIn = "0x2222222222222222222222222222222222222222";
 const tokenOut = "0x3333333333333333333333333333333333333333";
+const economics = { gasCostUsd: 0.25, lenderPremiumUsd: 0.09, slippageUsd: 0.05 };
 
 test("reads a block-pinned Uniswap V3 quote and preserves bigint output", async () => {
   const methods: string[] = [];
@@ -25,7 +26,7 @@ test("reads a block-pinned Uniswap V3 quote and preserves bigint output", async 
   };
 
   const provider = createUniswapV3QuoteProvider(
-    { chainId: 1, quoterAddress: quoter, fee: 3000, maxQuoteAgeMs: 5000 },
+    { chainId: 1, quoterAddress: quoter, fee: 3000, maxQuoteAgeMs: 5000, ...economics },
     {},
     rpc,
   );
@@ -33,17 +34,42 @@ test("reads a block-pinned Uniswap V3 quote and preserves bigint output", async 
   assert.equal(quote.amountOut, 12345678901234567890n);
   assert.equal(quote.blockNumber, 16n);
   assert.equal(quote.sourceId, "uniswap-v3-quoter-v2:1");
+  assert.equal(quote.gasCostUsd, economics.gasCostUsd);
+  assert.equal(quote.lenderPremiumUsd, economics.lenderPremiumUsd);
+  assert.equal(quote.slippageUsd, economics.slippageUsd);
   assert.deepEqual(methods, ["eth_blockNumber", "eth_getBlockByNumber", "eth_call"]);
 });
 
 test("rejects requests for a different chain", async () => {
   const provider = createUniswapV3QuoteProvider(
-    { chainId: 1, quoterAddress: quoter, fee: 3000 },
+    { chainId: 1, quoterAddress: quoter, fee: 3000, ...economics },
     {},
     { request: async <T>() => "0x0" as T },
   );
   await assert.rejects(
     () => provider.quote({ chainId: 56, tokenIn, tokenOut, amountIn: 1n }),
     /QUOTE_CHAIN_MISMATCH/,
+  );
+});
+
+test("rejects missing economic inputs before any RPC call", () => {
+  assert.throws(
+    () => createUniswapV3QuoteProvider(
+      { chainId: 1, quoterAddress: quoter, fee: 3000, lenderPremiumUsd: 0, slippageUsd: 0 } as never,
+      {},
+      { request: async <T>() => "0x0" as T },
+    ),
+    /ECONOMIC_GAS_COST_REQUIRED/,
+  );
+});
+
+test("rejects invalid economic inputs before any RPC call", () => {
+  assert.throws(
+    () => createUniswapV3QuoteProvider(
+      { chainId: 1, quoterAddress: quoter, fee: 3000, gasCostUsd: -1, lenderPremiumUsd: 0, slippageUsd: 0 },
+      {},
+      { request: async <T>() => "0x0" as T },
+    ),
+    /ECONOMIC_GAS_COST_REQUIRED/,
   );
 });
