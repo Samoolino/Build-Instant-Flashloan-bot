@@ -31,17 +31,17 @@ contract FlashArbExecutorTest {
         address adapter = address(0x1001);
         address router = address(0x2002);
         address tokenA = address(0x3003);
-        address tokenB = address(0x4004);
 
         registry.setAdapter(adapter, true);
         registry.setRouter(adapter, router, true);
 
+        // A valid atomic route must return to the borrowed asset.
         FlashArbExecutor.Swap[] memory swaps = new FlashArbExecutor.Swap[](1);
         swaps[0] = FlashArbExecutor.Swap({
             adapter: adapter,
             router: router,
             tokenIn: tokenA,
-            tokenOut: tokenB,
+            tokenOut: tokenA,
             amountIn: 1 ether,
             minimumAmountOut: 1,
             data: hex"1234",
