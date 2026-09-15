@@ -1,10 +1,16 @@
 import type { RpcTransport } from "./rpc-client.js";
+import type { RouteCandidate } from "./route-planner.js";
 
 export type GasEstimateRequest = {
   from: string;
   to: string;
   data?: string;
   valueWei?: bigint;
+};
+
+export type ExecutableRouteContext = GasEstimateRequest & {
+  /** Marks calldata as the complete executor/route transaction, not a quote call. */
+  kind: "ROUTE_EXECUTION";
 };
 
 export type ExecutionEconomics = {
@@ -31,7 +37,7 @@ function usdMicro(value: number, error: string): bigint {
   return BigInt(scaled);
 }
 
-/** Estimates execution gas from the chain and converts the native cost to USD. No signing/broadcasting occurs. */
+/** Estimates execution gas from the chain and converts the native cost to USD. No signing or broadcasting occurs. */
 export async function estimateExecutionEconomics(
   rpc: RpcTransport,
   request: GasEstimateRequest,
@@ -68,4 +74,16 @@ export async function estimateExecutionEconomics(
   if (!Number.isFinite(gasCostUsd)) throw new Error("GAS_COST_USD_OUT_OF_RANGE");
 
   return { gasLimit, gasPriceWei, nativeCostWei, nativeUsdPrice, gasCostUsd };
+}
+
+/** Replaces a provisional planner gas cost with the estimate for the complete executable route. */
+export async function applyExecutionEconomics(
+  candidate: RouteCandidate,
+  rpc: RpcTransport,
+  route: ExecutableRouteContext,
+  nativeUsdPrice: number,
+): Promise<RouteCandidate> {
+  if (route.kind !== "ROUTE_EXECUTION") throw new Error("ROUTE_EXECUTION_CONTEXT_REQUIRED");
+  const economics = await estimateExecutionEconomics(rpc, route, nativeUsdPrice);
+  return { ...candidate, gasCostUsd: economics.gasCostUsd };
 }
