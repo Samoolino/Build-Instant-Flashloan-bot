@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  locked-build:
+    runs-on: ubuntu-latest
+    env:
+      EXECUTION_AUTHORIZATION: '0'
+      AUTHORIZATION_STATE: LOCKED
+      LIVE_SIGNING: 'false'
+      BROADCAST_ENABLED: 'false'
+      TRANSACTION_SIGNED: 'false'
+      TRANSACTION_BROADCAST: 'false'
+      LIVE_EXECUTION_READY: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: foundry-rs/foundry-toolchain@v1
+      - name: Verify locked state
+        run: node scripts/verify-locked-state.mjs
+      - name: Forge build
+        run: forge build
+      - name: Forge test
+        run: forge test
+      - name: Bot install
+        run: npm --prefix bot install --no-audit --no-fund
+      - name: Bot build
+        run: npm --prefix bot run build
+      - name: Dashboard install
+        run: npm --prefix dapp-dashboard install --no-audit --no-fund
+      - name: Dashboard build
+        run: npm --prefix dapp-dashboard run build
