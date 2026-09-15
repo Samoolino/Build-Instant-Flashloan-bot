@@ -8,7 +8,7 @@ const owner = "0x2222222222222222222222222222222222222222";
 test("reads ERC20 decimals, symbol and balance without floating-point amounts", async () => {
   const calls: string[] = [];
   const rpc = {
-    async request<T>(method: string, params: readonly unknown[]): Promise<T> {
+    async request<T>(method: string, params: readonly unknown[] = []): Promise<T> {
       calls.push(method);
       const data = String((params[0] as { data?: string }).data);
       if (data === "0x313ce567") return "0x12" as T;
@@ -24,5 +24,6 @@ test("reads ERC20 decimals, symbol and balance without floating-point amounts", 
 });
 
 test("rejects malformed token addresses", async () => {
-  await assert.rejects(() => readErc20Metadata({ request: async () => "0x12" }, "0x123", owner), /INVALID_TOKEN_ADDRESS/);
+  const rpc = { request: async <T>(_method: string, _params: readonly unknown[] = []) => "0x12" as T };
+  await assert.rejects(() => readErc20Metadata(rpc, "0x123", owner), /INVALID_TOKEN_ADDRESS/);
 });
