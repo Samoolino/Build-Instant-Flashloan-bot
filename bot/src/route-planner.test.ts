@@ -34,6 +34,13 @@ test("accepts a simulated route above the $2 hard floor", () => {
   assert.equal(planned.minimumProfitTokenUnits, 800_000_000_000_000n);
 });
 
+test("enforces a caller-supplied minimum profit policy", () => {
+  assert.throws(() => planRoute(baseCandidate, { minimumNetProfitUsd: 4 }), /./);
+  const planned = planRoute(baseCandidate, { minimumNetProfitUsd: 1 });
+  assert.equal(planned.decision.eligible, true);
+  assert.equal(planned.minimumProfitTokenUnits, 400_000_000_000_000n);
+});
+
 test("rejects an unsimulated route before profitability", () => {
   assert.throws(() => planRoute({ ...baseCandidate, simulationPassed: false }), /SIMULATION_REQUIRED/);
 });
@@ -44,4 +51,13 @@ test("rejects a route that cannot repay the lender", () => {
 
 test("rejects unsupported canonical chains", () => {
   assert.throws(() => planRoute({ ...baseCandidate, chainId: 999999 }), /UNSUPPORTED_CANONICAL_CHAIN/);
+});
+
+test("preserves token-unit precision for large base-unit balances", () => {
+  const planned = planRoute({
+    ...baseCandidate,
+    loanAmount: 1_000_000_000_000_000_000_000_000_000_000n,
+    finalAmount: 1_000_000_000_000_000_000_000_000_000_800n,
+  });
+  assert.equal(planned.netProfitUsd, 1.8);
 });
