@@ -29,7 +29,8 @@ test("rejects a receipt before the locked observation block", () => {
 });
 
 test("rejects a failed receipt", () => {
-  assert.throws(() => verifyPostExecutionAccounting({ receipt: { ...receipt, status: "FAILED" }, record, finalLoanAssetBalance: 1025n }), /TRANSACTION_NOT_SUCCESSFUL/);
+  const failedReceipt = { ...receipt, status: "FAILED" } as unknown as PostExecutionVerification;
+  assert.throws(() => verifyPostExecutionAccounting({ receipt: failedReceipt, record, finalLoanAssetBalance: 1025n }), /TRANSACTION_NOT_SUCCESSFUL/);
 });
 
 test("rejects insufficient final balance", () => {
