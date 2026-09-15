@@ -6,9 +6,15 @@ export type ProfitabilityDecision = {
   reason: string;
 };
 
-export function evaluateNetProfitUsd(netProfitUsd: number): ProfitabilityDecision {
+export function evaluateNetProfitUsd(
+  netProfitUsd: number,
+  minimumNetProfitUsd: number = MINIMUM_NET_PROFIT_USD,
+): ProfitabilityDecision {
   if (!Number.isFinite(netProfitUsd)) return { eligible: false, reason: "INVALID_NET_PROFIT" };
-  if (netProfitUsd < MINIMUM_NET_PROFIT_USD) return { eligible: false, reason: "BELOW_HARD_FLOOR" };
+  if (!Number.isFinite(minimumNetProfitUsd) || minimumNetProfitUsd < 0) {
+    return { eligible: false, reason: "INVALID_MINIMUM_NET_PROFIT" };
+  }
+  if (netProfitUsd < minimumNetProfitUsd) return { eligible: false, reason: "BELOW_HARD_FLOOR" };
   return { eligible: true, reason: netProfitUsd >= TARGET_PROFIT_USD ? "TARGET_REACHED" : "ABOVE_HARD_FLOOR" };
 }
 
