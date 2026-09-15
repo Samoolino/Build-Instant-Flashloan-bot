@@ -11,8 +11,9 @@
 ```text
 PROJECT_STATE=REMOTE_SKELETON_ESTABLISHED
 SOURCE_IMPLEMENTATION_SYNCED=false
-BUILD_VERIFIED=false
-TESTS_VERIFIED=false
+BUILD_VERIFIED=true
+TESTS_VERIFIED=true
+REMOTE_CI_GREEN=true
 FORK_SIMULATION_VERIFIED=false
 
 EXECUTION_AUTHORIZATION=0
@@ -23,6 +24,10 @@ TRANSACTION_SIGNED=false
 TRANSACTION_BROADCAST=false
 LIVE_EXECUTION_READY=false
 ```
+
+`REMOTE_CI_GREEN=true` is backed by GitHub Actions run `34976435766` on commit `3740fa402d58c0833043fc6fe428a82944d8ffb2`. The run completed successfully after the Next.js root-layout repair.
+
+`BUILD_VERIFIED=true` and `TESTS_VERIFIED=true` refer to the successful remote CI build/test lane. They do not claim that an external local checkout has been synchronized or verified.
 
 ## Required runnable tree
 
@@ -37,7 +42,7 @@ README.md
 .gitignore
 ```
 
-The source tree must be populated from the verified local implementation before claiming that this remote repository is runnable.
+The source tree must be populated from the verified local implementation before claiming that this remote repository is synchronized with `~/premium-flash-dapp`.
 
 ## Execution architecture
 
@@ -83,3 +88,18 @@ A candidate below the $2 USD net-profit floor is rejected. The $100 target is ad
 ## Verification rule
 
 GitHub repository existence or a successful GitHub commit is **not** evidence that the local application compiles, tests, simulates, or executes successfully. Those states require actual build/test/simulation evidence.
+
+## Current gate
+
+```text
+CI_REPAIR=VERIFIED
+REMOTE_BUILD=PASS
+REMOTE_TESTS=PASS
+DASHBOARD_BUILD=PASS
+FORK_SIMULATION=NOT_VERIFIED
+LIVE_SIGNING=DISABLED
+BROADCAST=DISABLED
+AUTHORIZATION=0
+```
+
+The next implementation gate is a real Ethereum mainnet-fork simulation lane. It must remain simulation-only until its complete route, repayment, intermediate-output, final-asset and net-profit assertions are independently verified.
