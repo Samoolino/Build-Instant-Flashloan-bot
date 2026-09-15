@@ -18,6 +18,7 @@ const candidate: RouteCandidate = {
   repaymentAmount: 1_000_000n,
   planHash: "0xplan",
   simulationPassed: true,
+  economicInputsVerified: true,
   legs: [{
     chainId: 1,
     tokenIn: "0x0000000000000000000000000000000000000001",
@@ -79,4 +80,13 @@ test("feeds complete-route gas cost into the profitability planner", async () =>
   assert.equal(planned.candidate.gasCostUsd, 0.0525);
   assert.equal(planned.netProfitUsd, 24.9475);
   assert.equal(planned.decision.eligible, true);
+});
+
+test("does not let gas estimation claim verification when other economics are unverified", async () => {
+  const updated = await applyExecutionEconomics({ ...candidate, economicInputsVerified: false }, mockRpc(), route, 2500);
+  assert.equal(updated.economicInputsVerified, false);
+  await assert.rejects(
+    planRouteWithExecutionEconomics({ ...candidate, economicInputsVerified: false }, mockRpc(), route, 2500),
+    /VERIFIED_ECONOMICS_REQUIRED/,
+  );
 });
