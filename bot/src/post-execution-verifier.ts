@@ -50,6 +50,10 @@ export async function verifyPostExecutionReceipt(
     throw new Error("POST_EXECUTION_POLICY_VIOLATION");
   }
 
+  const chainIdHex = await rpc.request<string>("eth_chainId", []);
+  const chainId = quantity(chainIdHex, "INVALID_RPC_CHAIN_ID");
+  if (chainId !== BigInt(record.chainId)) throw new Error("RECEIPT_CHAIN_MISMATCH");
+
   const receipt = await rpc.request<TransactionReceipt | null>("eth_getTransactionReceipt", [transactionHash]);
   if (!receipt) throw new Error("TRANSACTION_RECEIPT_NOT_FOUND");
   if (receipt.transactionHash.toLowerCase() !== transactionHash.toLowerCase()) throw new Error("RECEIPT_HASH_MISMATCH");
