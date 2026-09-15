@@ -37,8 +37,9 @@ interface IFlashLoanSimpleReceiver {
 contract AaveFlashLoanCallbackForkTest is IFlashLoanSimpleReceiver {
     Vm internal constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
 
-    address internal constant AAVE_V3_POOL = 0x87870Bca3FfD6335C3F4ce8392D69350B4fA4E2;
-    address internal constant WETH = 0xC02aaA39b223FE8D0A0e0e5C4F27eAD9083C756Cc2;
+    // Aave V3 Ethereum Core Pool and canonical WETH.
+    address internal constant AAVE_V3_POOL = 0x87870bcA3f3fD6335C3F4ce8392D69350B4fA4E2;
+    address internal constant WETH = 0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2;
 
     bool internal callbackSeen;
     address internal callbackAsset;
