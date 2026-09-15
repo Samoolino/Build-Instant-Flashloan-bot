@@ -26,7 +26,7 @@ contract AaveFlashLoanCallbackForkTest is IFlashLoanSimpleReceiver {
     Vm internal constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
 
     address internal constant AAVE_V3_POOL = 0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2;
-    address internal constant WETH = 0xC02aaA39b223FE8D0a0e5C4F27eAD9083C756Cc2;
+    address internal constant WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
 
     bool internal callbackSeen;
     address internal callbackAsset;
