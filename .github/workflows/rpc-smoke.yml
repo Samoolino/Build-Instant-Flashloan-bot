@@ -1,0 +1,53 @@
+name: RPC Smoke Verification
+
+on:
+  workflow_dispatch:
+
+jobs:
+  rpc-smoke:
+    runs-on: ubuntu-latest
+    env:
+      EXECUTION_AUTHORIZATION: '0'
+      AUTHORIZATION_STATE: LOCKED
+      LIVE_SIGNING: 'false'
+      BROADCAST_ENABLED: 'false'
+      TRANSACTION_SIGNED: 'false'
+      TRANSACTION_BROADCAST: 'false'
+      LIVE_EXECUTION_READY: 'false'
+      ETH_RPC_URL: ${{ secrets.ETH_RPC_URL }}
+      BSC_RPC_URL: ${{ secrets.BSC_RPC_URL }}
+      BASE_RPC_URL: ${{ secrets.BASE_RPC_URL }}
+      ARBITRUM_RPC_URL: ${{ secrets.ARBITRUM_RPC_URL }}
+      AVAX_RPC_URL: ${{ secrets.AVAX_RPC_URL }}
+      CRONOS_RPC_URL: ${{ secrets.CRONOS_RPC_URL }}
+      SONIC_RPC_URL: ${{ secrets.SONIC_RPC_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify locked state
+        run: node scripts/verify-locked-state.mjs
+      - name: Run configured read-only RPC probes
+        shell: bash
+        run: |
+          set -euo pipefail
+          run_probe() {
+            local name="$1" envvar="$2" chain="$3"
+            local url="${!envvar:-}"
+            if [[ -z "$url" ]]; then
+              echo "SKIP $name: $envvar is not configured"
+              return 0
+            fi
+            echo "=== $name / chain $chain ==="
+            RPC_URL="$url" EXPECTED_CHAIN_ID="$chain" node scripts/rpc-smoke.mjs
+          }
+          run_probe Ethereum ETH_RPC_URL 1
+          run_probe "BNB Chain" BSC_RPC_URL 56
+          run_probe Base BASE_RPC_URL 8453
+          run_probe Arbitrum ARBITRUM_RPC_URL 42161
+          run_probe Avalanche AVAX_RPC_URL 43114
+          run_probe Cronos CRONOS_RPC_URL 25
+          run_probe Sonic SONIC_RPC_URL 146
+      - name: Confirm signing boundary remains disabled
+        run: node scripts/verify-locked-state.mjs
