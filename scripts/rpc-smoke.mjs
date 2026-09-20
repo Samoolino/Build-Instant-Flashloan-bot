@@ -20,14 +20,20 @@ if (chainId !== BigInt(expectedChainId)) throw new Error("CHAIN_ID_MISMATCH:expe
 const blockHex = await rpc("eth_blockNumber");
 const block = hexNumber(blockHex, "BLOCK_NUMBER");
 const blockObject = await rpc("eth_getBlockByNumber", [blockHex, false]);
-if (!blockObject || typeof blockObject !== "object") throw new Error("LATEST_BLOCK_INVALID");
+if (!blockObject || typeof blockObject !== "object" || typeof blockObject.hash !== "string") throw new Error("LATEST_BLOCK_INVALID");
+if (typeof await rpc("eth_getBlockByHash", [blockObject.hash, false]) !== "object") throw new Error("BLOCK_BY_HASH_INVALID");
 const netVersion = await rpc("net_version");
 hexNumber(await rpc("eth_gasPrice"), "GAS_PRICE");
 const zero = "0x0000000000000000000000000000000000000000";
 hexNumber(await rpc("eth_getBalance", [zero, "latest"]), "BALANCE");
 if (typeof await rpc("eth_getCode", [zero, "latest"]) !== "string") throw new Error("CODE_INVALID");
 if (typeof await rpc("eth_call", [{ to: zero, data: "0x" }, "latest"]) !== "string") throw new Error("ETH_CALL_RESULT_INVALID");
-if (process.env.PROBE_ESTIMATE_GAS === "1") hexNumber(await rpc("eth_estimateGas", [{ from: zero, to: zero, data: "0x", value: "0x0" }]), "ESTIMATE_GAS");
+hexNumber(await rpc("eth_estimateGas", [{ from: zero, to: zero, data: "0x", value: "0x0" }]), "ESTIMATE_GAS");
+const probeTxHash = "0x" + "00".repeat(32);
+const probeTx = await rpc("eth_getTransactionByHash", [probeTxHash]);
+const probeReceipt = await rpc("eth_getTransactionReceipt", [probeTxHash]);
+if (probeTx !== null) throw new Error("UNEXPECTED_PROBE_TRANSACTION");
+if (probeReceipt !== null) throw new Error("UNEXPECTED_PROBE_RECEIPT");
 const txHash = process.env.TX_HASH?.trim();
 if (txHash) {
   if (!/^0x[0-9a-fA-F]{64}$/.test(txHash)) throw new Error("TX_HASH_INVALID");
