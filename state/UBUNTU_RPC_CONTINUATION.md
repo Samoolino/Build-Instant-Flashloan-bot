@@ -35,3 +35,19 @@ Anvil fork backed by Ethereum upstream RPC:
 The Anvil fork path verifies that Anvil can obtain fork state from the supplied upstream endpoint. It does not broadcast to mainnet.
 
 For CI, add complete RPC URLs as GitHub Actions secrets named ETH_RPC_URL, BSC_RPC_URL, BASE_RPC_URL, ARBITRUM_RPC_URL, AVAX_RPC_URL, CRONOS_RPC_URL and SONIC_RPC_URL, then manually dispatch the RPC Smoke Verification workflow.
+
+## Strict live-read validation
+
+For a fresh Ubuntu checkout, use one control terminal for build/state checks and one terminal per network when parallelism is desired. The strict seven-network read-only validator is:
+
+    chmod +x scripts/alchemy-rpc-env.sh scripts/ubuntu-rpc-live-validate.sh
+    read -rsp 'Alchemy API key: ' ALCHEMY_API_KEY; echo
+    export ALCHEMY_API_KEY
+    bash scripts/ubuntu-rpc-live-validate.sh
+    unset ALCHEMY_API_KEY
+
+The validator writes one transcript per network under `$HOME/Desktop/build-instant-flashloan-live-rpc/` and does not print the credential.
+
+For parallel Anvil-backed validation, use seven network terminals plus one control terminal. Suggested ports are Ethereum `18545`, BNB `18546`, Base `18547`, Arbitrum `18548`, Avalanche `18549`, Cronos `18550`, and Sonic `18551`. Each Anvil process is local and does not broadcast upstream. Run the corresponding upstream-backed Anvil fork only after the direct RPC probe for that network succeeds.
+
+Direct provider validation is the authoritative read-access check. Local Anvil validation alone is not evidence that the provider endpoint works.
