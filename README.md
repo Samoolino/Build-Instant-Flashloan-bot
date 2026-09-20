@@ -71,3 +71,7 @@ A green normal CI run proves build/tests against the repository's deterministic 
 The complete local implementation may contain additional generated execution-state artifacts under `state/`. Those artifacts must remain locked to simulation/review until an explicit future authorization boundary is satisfied.
 
 This repository's GitHub state is not evidence that a local build, test, fork simulation, quote, or transaction succeeded. Those claims require reproducible command output and/or CI evidence.
+
+## Live RPC validation
+
+Use `scripts/alchemy-rpc-env.sh` to construct the seven configured Alchemy endpoints from `ALCHEMY_API_KEY` without committing the credential. Use `scripts/ubuntu-rpc-live-validate.sh` for a strict read-only seven-network matrix with Desktop transcripts. See `state/LIVE_RPC_VALIDATION.md` for the distinction between mocked unit tests, Ethereum fork tests, Anvil fork tests and direct provider RPC validation.
