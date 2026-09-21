@@ -10,8 +10,17 @@ source scripts/alchemy-rpc-env.sh
 
 run_probe() {
   local name="$1" envvar="$2" chain="$3"
-  local url="${!envvar:-}"
-  local safe="${name// /_}"
+  local url
+  case "$envvar" in
+    ETH_RPC_URL) url="${ETH_RPC_URL:-}" ;;
+    BSC_RPC_URL) url="${BSC_RPC_URL:-}" ;;
+    BASE_RPC_URL) url="${BASE_RPC_URL:-}" ;;
+    ARBITRUM_RPC_URL) url="${ARBITRUM_RPC_URL:-}" ;;
+    AVAX_RPC_URL) url="${AVAX_RPC_URL:-}" ;;
+    CRONOS_RPC_URL) url="${CRONOS_RPC_URL:-}" ;;
+    SONIC_RPC_URL) url="${SONIC_RPC_URL:-}" ;;
+    *) echo "FAIL $name: unsupported RPC variable $envvar"; return 1 ;;
+  esac
 
   [[ -n "$url" ]] || {
     echo "FAIL $name: $envvar is unset"
@@ -19,7 +28,7 @@ run_probe() {
   }
 
   echo "=== $name chain=$chain ==="
-  RPC_URL="$url" EXPECTED_CHAIN_ID="$chain"     node scripts/rpc-smoke.mjs 2>&1 | tee "$RPC_LOG_DIR/${safe}.txt"
+  RPC_URL="$url" EXPECTED_CHAIN_ID="$chain" node scripts/rpc-smoke.mjs 2>&1 | tee "$RPC_LOG_DIR/${name// /_}.txt"
 }
 
 failures=0
