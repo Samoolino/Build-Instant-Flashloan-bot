@@ -65,5 +65,5 @@ test("rejects block mismatch", () => {
 
 test("rejects policy mutation", () => {
   const audit = makeAudit();
-  assert.throws(() => verifyPostExecutionAuditRecord({ ...audit, liveSigning: true }), /AUDIT_POLICY_VIOLATION/);
+  assert.throws(() => verifyPostExecutionAuditRecord({ ...audit, liveSigning: true as never }), /AUDIT_POLICY_VIOLATION/);
 });
