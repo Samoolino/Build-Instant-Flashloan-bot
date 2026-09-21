@@ -25,6 +25,10 @@ jobs:
       - uses: foundry-rs/foundry-toolchain@v1
       - name: Verify locked state
         run: node scripts/verify-locked-state.mjs
+      - name: Validate RPC scripts
+        run: |
+          node --check scripts/rpc-request-matrix.mjs
+          bash -n scripts/alchemy-rpc-env.sh
       - name: Forge build
         run: forge build
       - name: Forge test
