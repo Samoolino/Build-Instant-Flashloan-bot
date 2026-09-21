@@ -30,7 +30,7 @@ function fixture() {
     broadcastEnabled: false as const,
   };
   const intent = {
-    kind: "FLASH_ARB" as const,
+    kind: "EXTERNAL_SIGNER_INTENT" as const,
     observationId: record.observationId,
     chainId: 1,
     to: target,
