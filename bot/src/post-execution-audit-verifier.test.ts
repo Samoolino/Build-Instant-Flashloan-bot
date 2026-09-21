@@ -13,7 +13,7 @@ const record = {
   simulationPassed: true, economicInputsVerified: true, netProfitUsd: 5, minimumProfitTokenUnits: 10n,
   decision: { eligible: true, reason: "ABOVE_HARD_FLOOR" }, gasCostUsd: 1,
   loanToken: "0x0000000000000000000000000000000000000001", loanAmount: 1000n, repaymentAmount: 1001n,
-  executionAuthorization: 0, liveSigning: false, broadcastEnabled: false,
+  executionAuthorization: 0 as const, liveSigning: false as const, broadcastEnabled: false as const,
 } as unknown as ExecutionLockRecord;
 
 const accounting = {
