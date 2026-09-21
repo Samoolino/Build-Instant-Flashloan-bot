@@ -41,6 +41,7 @@ function fixture() {
     loanAmount: 1000n,
     repaymentAmount: 1001n,
     minimumProfit: 2n,
+    minimumProfitTokenUnits: 2n,
     expiresAtMs: 2000,
     executionAuthorization: 0 as const,
     liveSigning: false as const,
