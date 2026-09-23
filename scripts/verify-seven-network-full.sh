@@ -9,6 +9,19 @@ LOG_DIR="${ANVIL_VERIFY_LOG_DIR:-$HOME/Desktop/build-instant-flashloan-anvil}"
 mkdir -p "$LOG_DIR"
 PIDS=()
 
+# Safe environment bootstrap: run this file directly; do not source it.
+# If an Alchemy key is present, derive all seven RPC URLs here. Existing explicit
+# RPC variables are preserved when no key is supplied.
+if [[ -n "${ALCHEMY_API_KEY:-}" && "${ALCHEMY_API_KEY}" != "YOUR_CURRENT_ALCHEMY_KEY" ]]; then
+  source scripts/alchemy-rpc-env.sh
+fi
+
+require_rpc_env() {
+  local envvar="$1"
+  [[ -n "${!envvar:-}" ]] || { echo "FAIL $envvar is unset. Set ALCHEMY_API_KEY or export $envvar."; exit 1; }
+  [[ "${!envvar}" != *'${!envvar:-}'* ]] || { echo "FAIL $envvar contains an unevaluated shell expression."; exit 1; }
+}
+
 NETWORKS=(
   "Ethereum|ETH_RPC_URL|1"
   "BNB Chain|BSC_RPC_URL|56"
@@ -49,7 +62,8 @@ for entry in "${NETWORKS[@]}"; do
   upstream="${!envvar:-}"
   safe="${name// /_}"
 
-  [[ -n "$upstream" ]] || { echo "FAIL $name: $envvar is unset"; exit 1; }
+  require_rpc_env "$envvar"
+  upstream="${!envvar}"
 
   echo
   echo "[$name] Anvil fork -> $rpc"
