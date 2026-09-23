@@ -2,6 +2,7 @@
 set -euo pipefail
 
 cd "$(git rev-parse --show-toplevel)"
+source scripts/alchemy-rpc-env.sh
 : "${ETH_RPC_URL:?Set ETH_RPC_URL before running Ethereum Anvil/Aave verification}"
 PORT="${ETH_AAVE_ANVIL_PORT:-18555}"
 LOG_DIR="${ETH_AAVE_ANVIL_LOG_DIR:-$HOME/Desktop/build-instant-flashloan-ethereum-anvil}"
