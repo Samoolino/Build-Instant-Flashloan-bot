@@ -116,7 +116,6 @@ contract AaveFlashArbExecutorForkTest {
         require(executor.activeLender() == address(0), "ACTIVE_LENDER_NOT_CLEARED");
         require(executor.activePlanHash() == bytes32(0), "PLAN_HASH_NOT_CLEARED");
     }
-    }
 }
 
 contract DeterministicRouter is ISushiMockRouter {
