@@ -3,6 +3,8 @@ const url = process.env.RPC_URL?.trim();
 const expectedChainId = process.env.EXPECTED_CHAIN_ID?.trim();
 if (!url) throw new Error("RPC_URL is required");
 if (!expectedChainId) throw new Error("EXPECTED_CHAIN_ID is required");
+if (/\\$\\{|YOUR_|PASTE_YOUR_|replace_with_/i.test(url)) throw new Error("RPC_URL contains a placeholder or unevaluated shell expression");
+try { new URL(url); } catch { throw new Error("RPC_URL is not a valid URL"); }
 async function rpc(method, params = []) {
   const response = await fetch(url, { method: "POST", headers: { "content-type": "application/json" },
     body: JSON.stringify({ jsonrpc: "2.0", id: Date.now(), method, params }) });
