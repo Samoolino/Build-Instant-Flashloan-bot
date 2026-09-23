@@ -6,7 +6,8 @@
   "scripts": {
     "build": "tsc --noEmit",
     "test": "node --test",
-    "hermes:mcp": "node --experimental-strip-types src/hermes-mcp.ts"
+    "hermes:mcp": "node --experimental-strip-types src/hermes-mcp.ts",
+    "hermes:rpc": "source ../scripts/alchemy-rpc-env.sh && node src/hermes-rpc-bridge.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
