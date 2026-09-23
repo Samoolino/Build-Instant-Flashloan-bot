@@ -12,7 +12,7 @@ PIDS=()
 # Safe environment bootstrap: run this file directly; do not source it.
 # If an Alchemy key is present, derive all seven RPC URLs here. Existing explicit
 # RPC variables are preserved when no key is supplied.
-if [[ -n "${ALCHEMY_API_KEY:-}" && "${ALCHEMY_API_KEY}" != "YOUR_CURRENT_ALCHEMY_KEY" ]]; then
+if [[ -n "${ALCHEMY_API_KEY:-}" ]]; then
   source scripts/alchemy-rpc-env.sh
 fi
 
