@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "build": "tsc --noEmit",
-    "test": "node --test"
+    "test": "node --test",
+    "hermes:mcp": "node --experimental-strip-types src/hermes-mcp.ts"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
