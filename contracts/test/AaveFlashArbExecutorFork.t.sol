@@ -67,10 +67,13 @@ contract AaveFlashArbExecutorForkTest {
 
         executor.setExecutionEnabled(true);
         uint256 loanAmount = 10 ether;
-        uint256 premiumBuffer = 1e15;
+        uint256 premiumBuffer = 20e15;
         uint256 expectedProfit = 2e15;
         uint256 minimumProfit = 1e15;
-        router.setSecondLegProfit(expectedProfit + premiumBuffer);
+        uint256 deterministicSecondLegProfit = expectedProfit + premiumBuffer;
+        router.setSecondLegProfit(deterministicSecondLegProfit);
+        // Fund the deterministic fork router with the extra WETH it must return on leg two.
+        vm.deal(WETH, address(router), deterministicSecondLegProfit);
 
         FlashArbExecutor.Swap[] memory swaps = new FlashArbExecutor.Swap[](2);
         address[] memory path1 = new address[](2);
