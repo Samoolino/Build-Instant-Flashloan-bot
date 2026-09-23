@@ -16,6 +16,17 @@ load_dotenv_value() {
   [[ -n "$value" ]] && printf '%s' "$value"
 }
 
+is_placeholder() {
+  local value="$1"
+  [[ -z "$value" ]] && return 0
+  [[ "$value" == *'\\${'* ]] && return 0
+  [[ "$value" == *'YOUR_'* ]] && return 0
+  [[ "$value" == *'PASTE_YOUR_'* ]] && return 0
+  [[ "$value" == *'replace_with_'* ]] && return 0
+  [[ "$value" == *'$ALCHEMY_API_KEY'* ]] && return 0
+  return 1
+}
+
 if [[ -z "${ALCHEMY_API_KEY:-}" ]]; then
   _dotenv_key="$(load_dotenv_value ALCHEMY_API_KEY || true)"
   [[ -n "$_dotenv_key" ]] && export ALCHEMY_API_KEY="$_dotenv_key"
@@ -56,6 +67,20 @@ else
   : "${AVAX_RPC_URL:=https://avax-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}}"
   : "${CRONOS_RPC_URL:=https://cronos-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}}"
   : "${SONIC_RPC_URL:=https://sonic-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}}"
+  for _rpc_var in ETH_RPC_URL BSC_RPC_URL BASE_RPC_URL ARBITRUM_RPC_URL AVAX_RPC_URL CRONOS_RPC_URL SONIC_RPC_URL; do
+    _rpc_value="${!_rpc_var:-}"
+    if is_placeholder "$_rpc_value"; then
+      case "$_rpc_var" in
+        ETH_RPC_URL) export "$_rpc_var=https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}" ;;
+        BSC_RPC_URL) export "$_rpc_var=https://bnb-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}" ;;
+        BASE_RPC_URL) export "$_rpc_var=https://base-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}" ;;
+        ARBITRUM_RPC_URL) export "$_rpc_var=https://arb-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}" ;;
+        AVAX_RPC_URL) export "$_rpc_var=https://avax-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}" ;;
+        CRONOS_RPC_URL) export "$_rpc_var=https://cronos-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}" ;;
+        SONIC_RPC_URL) export "$_rpc_var=https://sonic-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}" ;;
+      esac
+    fi
+  done
   export ETH_RPC_URL BSC_RPC_URL BASE_RPC_URL ARBITRUM_RPC_URL AVAX_RPC_URL CRONOS_RPC_URL SONIC_RPC_URL
 fi
 
