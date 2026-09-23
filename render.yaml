@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: flash-arb7-hermes-control
+    runtime: node
+    plan: starter
+    rootDir: bot
+    buildCommand: npm ci
+    startCommand: node src/hermes-control-server.mjs
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: HERMES_MODE
+        value: IMPLEMENTATION
+      - key: HERMES_CONTROL_TOKEN
+        sync: false
