@@ -32,3 +32,8 @@ Do not place RPC URLs, API keys, seed phrases, private keys, or signer credentia
 Hermes observation -> evaluate_opportunity -> investigate/requote/simulate -> deterministic lock -> create_unsigned_intent -> external signer/human authorization -> external broadcast -> RPC receipt verification -> post-execution audit -> Hermes learns from evidence.
 
 The MCP layer intentionally stops before signing and broadcasting. Later autonomy must add deterministic authorization gates rather than granting the agent transaction authority.
+## Live RPC bridge
+
+Hermes may invoke the read-only RPC bridge after the environment has been loaded with `scripts/alchemy-rpc-env.sh`. It checks chain ID, latest block, and gas price across the seven configured EVM networks. It never prints credentials, signs transactions, or broadcasts transactions.
+
+Run: `source scripts/alchemy-rpc-env.sh && node bot/src/hermes-rpc-bridge.mjs`
