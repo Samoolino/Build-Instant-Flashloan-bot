@@ -1,0 +1,7 @@
+import { NextResponse } from 'next/server';
+const providers = [['Ethereum','ETH_RPC_URL',1],['BNB Chain','BSC_RPC_URL',56],['Base','BASE_RPC_URL',8453],['Arbitrum One','ARBITRUM_RPC_URL',42161],['Avalanche C-Chain','AVAX_RPC_URL',43114],['Cronos','CRONOS_RPC_URL',25],['Sonic','SONIC_RPC_URL',146]];
+async function rpc(url, method, params=[]) { const c=new AbortController(); const t=setTimeout(()=>c.abort(),8000); try { const r=await fetch(url,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method,params}),cache:'no-store',signal:c.signal}); if(!r.ok) throw new Error('HTTP_'+r.status); const b=await r.json(); if(b.error) throw new Error('RPC_'+b.error.code); return b.result; } finally { clearTimeout(t); } }
+export async function GET() {
+ const results=await Promise.all(providers.map(async ([name,env,expectedChainId])=>{ const url=process.env[env]; if(!url) return {name,env,expectedChainId,status:'not_configured'}; try { const chainId=Number(BigInt(await rpc(url,'eth_chainId'))); if(chainId!==expectedChainId) return {name,env,expectedChainId,chainId,status:'chain_mismatch'}; const latestBlock=Number(BigInt(await rpc(url,'eth_blockNumber'))); return {name,env,expectedChainId,chainId,latestBlock,status:'online'}; } catch(e) { return {name,env,expectedChainId,status:'error',error:e instanceof Error?e.message:'RPC_ERROR'}; } }));
+ return NextResponse.json({timestamp:new Date().toISOString(),readOnly:true,signing:false,broadcast:false,providers:results},{headers:{'cache-control':'no-store'}});
+}
