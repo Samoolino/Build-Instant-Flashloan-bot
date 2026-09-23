@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+cd "$(git rev-parse --show-toplevel)"
+
 # Full seven-network local Anvil verification.
 # Each network is forked from its configured real RPC, then every read-only
 # RPC probe is executed against the local Anvil endpoint. No signing/broadcast.
@@ -12,9 +14,7 @@ PIDS=()
 # Safe environment bootstrap: run this file directly; do not source it.
 # If an Alchemy key is present, derive all seven RPC URLs here. Existing explicit
 # RPC variables are preserved when no key is supplied.
-if [[ -n "${ALCHEMY_API_KEY:-}" ]]; then
-  source scripts/alchemy-rpc-env.sh
-fi
+source scripts/alchemy-rpc-env.sh
 
 require_rpc_env() {
   local envvar="$1"
