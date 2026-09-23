@@ -25,3 +25,6 @@ state/secrets/
 .DS_Store
 .vscode/
 .idea/
+
+# Local RPC credentials
+nano.env
