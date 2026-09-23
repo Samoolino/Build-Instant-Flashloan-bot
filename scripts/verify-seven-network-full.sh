@@ -59,13 +59,25 @@ for entry in "${NETWORKS[@]}"; do
   IFS='|' read -r name envvar expected <<<"$entry"
   port=$((BASE_PORT + i))
   rpc="http://127.0.0.1:$port"
-  upstream="${!envvar:-}"
+  case "$envvar" in
+    ETH_RPC_URL) upstream="${ETH_RPC_URL:-}" ;;
+    BSC_RPC_URL) upstream="${BSC_RPC_URL:-}" ;;
+    BASE_RPC_URL) upstream="${BASE_RPC_URL:-}" ;;
+    ARBITRUM_RPC_URL) upstream="${ARBITRUM_RPC_URL:-}" ;;
+    AVAX_RPC_URL) upstream="${AVAX_RPC_URL:-}" ;;
+    CRONOS_RPC_URL) upstream="${CRONOS_RPC_URL:-}" ;;
+    SONIC_RPC_URL) upstream="${SONIC_RPC_URL:-}" ;;
+    *) echo "FAIL $name: unsupported RPC variable $envvar"; exit 1 ;;
+  esac
   safe="${name// /_}"
 
   require_rpc_env "$envvar"
-  upstream="${!envvar}"
+  [[ "$upstream" != *'\${'* && "$upstream" != *'YOUR_'* && "$upstream" != *'PASTE_YOUR_'* ]] || { echo "FAIL $name: placeholder/unevaluated RPC URL"; exit 1; }
 
   echo
+  echo "[$name] Direct upstream RPC probe"
+  RPC_URL="$upstream" EXPECTED_CHAIN_ID="$expected" node scripts/rpc-smoke.mjs | tee "$LOG_DIR/$safe-upstream-rpc.txt"
+
   echo "[$name] Anvil fork -> $rpc"
   anvil --fork-url "$upstream" --host 127.0.0.1 --port "$port" --silent >"$LOG_DIR/$safe-anvil.log" 2>&1 &
   pid=$!
