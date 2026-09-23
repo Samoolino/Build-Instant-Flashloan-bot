@@ -100,9 +100,22 @@ contract AaveFlashArbExecutorForkTest {
         uint256 before = IERC20Fork(WETH).balanceOf(address(this));
         executor.startFlashLoan(AAVE_V3_POOL, plan);
         uint256 afterBalance = IERC20Fork(WETH).balanceOf(address(this));
-        require(afterBalance >= before + minimumProfit, "NET_PROFIT_NOT_REALIZED");
+        _assertForkExecution(executor, address(this), WETH, before, afterBalance, minimumProfit);
+    }
+
+    function _assertForkExecution(
+        FlashArbExecutor executor,
+        address recipient,
+        address asset,
+        uint256 beforeBalance,
+        uint256 afterBalance,
+        uint256 minimumProfit
+    ) internal view {
+        require(afterBalance >= beforeBalance + minimumProfit, "NET_PROFIT_NOT_REALIZED");
+        require(IERC20Fork(asset).balanceOf(recipient) == afterBalance, "BALANCE_READ_MISMATCH");
         require(executor.activeLender() == address(0), "ACTIVE_LENDER_NOT_CLEARED");
         require(executor.activePlanHash() == bytes32(0), "PLAN_HASH_NOT_CLEARED");
+    }
     }
 }
 
