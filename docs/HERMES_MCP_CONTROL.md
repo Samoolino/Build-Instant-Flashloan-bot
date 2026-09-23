@@ -37,3 +37,19 @@ The MCP layer intentionally stops before signing and broadcasting. Later autonom
 Hermes may invoke the read-only RPC bridge after the environment has been loaded with `scripts/alchemy-rpc-env.sh`. It checks chain ID, latest block, and gas price across the seven configured EVM networks. It never prints credentials, signs transactions, or broadcasts transactions.
 
 Run: `source scripts/alchemy-rpc-env.sh && node bot/src/hermes-rpc-bridge.mjs`
+
+
+## Ubuntu Hermes bot screen
+
+The repository includes `scripts/start-hermes-screen.sh`, which creates a persistent tmux screen with separate control, live-RPC observation, MCP, agentic-board, and test windows.
+
+Start it from Ubuntu:
+
+```bash
+cd ~/Build-Instant-Flashloan-bot
+chmod +x scripts/start-hermes-screen.sh
+./scripts/start-hermes-screen.sh
+tmux attach -t flash-arb7-hermes
+```
+
+The screen is deliberately an implementation/control console rather than an autonomous signer. It keeps signing disabled, broadcast disabled, and execution authorization at zero. Live implementation may therefore proceed through observation, quoting, simulation, audit and unsigned intent generation, while the final signing/broadcast boundary remains external.
