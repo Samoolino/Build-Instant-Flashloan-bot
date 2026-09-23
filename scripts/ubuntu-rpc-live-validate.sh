@@ -8,9 +8,7 @@ mkdir -p "$RPC_LOG_DIR"
 
 # Direct execution is supported. A real Alchemy key is optional when explicit
 # RPC_URL variables are already exported.
-if [[ -n "${ALCHEMY_API_KEY:-}" ]]; then
-  source scripts/alchemy-rpc-env.sh
-fi
+source scripts/alchemy-rpc-env.sh
 
 run_probe() {
   local name="$1" envvar="$2" chain="$3" url
