@@ -6,29 +6,27 @@ cd "$(git rev-parse --show-toplevel)"
 RPC_LOG_DIR="${RPC_LOG_DIR:-$HOME/Desktop/build-instant-flashloan-live-rpc}"
 mkdir -p "$RPC_LOG_DIR"
 
-source scripts/alchemy-rpc-env.sh
+# Direct execution is supported. A real Alchemy key is optional when explicit
+# RPC_URL variables are already exported.
+if [[ -n "${ALCHEMY_API_KEY:-}" ]]; then
+  source scripts/alchemy-rpc-env.sh
+fi
 
 run_probe() {
-  local name="$1" envvar="$2" chain="$3"
-  local url
-  case "$envvar" in
-    ETH_RPC_URL) url="${ETH_RPC_URL:-}" ;;
-    BSC_RPC_URL) url="${BSC_RPC_URL:-}" ;;
-    BASE_RPC_URL) url="${BASE_RPC_URL:-}" ;;
-    ARBITRUM_RPC_URL) url="${ARBITRUM_RPC_URL:-}" ;;
-    AVAX_RPC_URL) url="${AVAX_RPC_URL:-}" ;;
-    CRONOS_RPC_URL) url="${CRONOS_RPC_URL:-}" ;;
-    SONIC_RPC_URL) url="${SONIC_RPC_URL:-}" ;;
-    *) echo "FAIL $name: unsupported RPC variable $envvar"; return 1 ;;
-  esac
-
-  [[ -n "$url" ]] || {
-    echo "FAIL $name: $envvar is unset"
+  local name="$1" envvar="$2" chain="$3" url
+  url="${!envvar:-}"
+  if [[ -z "$url" ]]; then
+    echo "FAIL $name: $envvar is unset. Export it or set ALCHEMY_API_KEY."
     return 1
-  }
+  fi
+  if [[ "$url" == *'\${'* || "$url" == *'YOUR_*' || "$url" == *'PASTE_YOUR_'* ]]; then
+    echo "FAIL $name: $envvar is still a placeholder/unevaluated value."
+    return 1
+  fi
 
   echo "=== $name chain=$chain ==="
-  RPC_URL="$url" EXPECTED_CHAIN_ID="$chain" node scripts/rpc-smoke.mjs 2>&1 | tee "$RPC_LOG_DIR/${name// /_}.txt"
+  RPC_URL="$url" EXPECTED_CHAIN_ID="$chain" node scripts/rpc-smoke.mjs 2>&1 |
+    tee "$RPC_LOG_DIR/${name// /_}.txt"
 }
 
 failures=0
