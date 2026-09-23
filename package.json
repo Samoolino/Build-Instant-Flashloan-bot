@@ -11,7 +11,9 @@
     "test": "forge test",
     "test:bot": "npm --prefix bot test",
     "test:dashboard": "npm --prefix dapp-dashboard test",
-    "verify:locked-state": "node scripts/verify-locked-state.mjs"
+    "verify:locked-state": "node scripts/verify-locked-state.mjs",
+    "verify:rpc-matrix": "source scripts/alchemy-rpc-env.sh && node scripts/verify-rpc-matrix.mjs",
+    "verify:dashboard": "source scripts/alchemy-rpc-env.sh && npm --prefix dapp-dashboard run build"
   },
   "engines": {
     "node": ">=20"
