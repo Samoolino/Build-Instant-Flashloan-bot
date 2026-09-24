@@ -8,7 +8,8 @@
     "test": "node --test",
     "hermes:mcp": "node --experimental-strip-types src/hermes-mcp.ts",
     "hermes:rpc": "source ../scripts/alchemy-rpc-env.sh && node src/hermes-rpc-bridge.mjs",
-    "hermes:control": "node src/hermes-control-server.mjs"
+    "hermes:control": "node src/hermes-control-server.mjs",
+    "hermes:run": "source ../scripts/alchemy-rpc-env.sh && node src/hermes-agentic-run.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
