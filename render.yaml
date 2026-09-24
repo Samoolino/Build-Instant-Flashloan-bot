@@ -5,7 +5,7 @@ services:
     plan: starter
     rootDir: bot
     buildCommand: npm ci
-    startCommand: node src/hermes-control-server.mjs
+    startCommand: npm run hermes:control
     healthCheckPath: /healthz
     envVars:
       - key: NODE_ENV
@@ -14,3 +14,45 @@ services:
         value: IMPLEMENTATION
       - key: HERMES_CONTROL_TOKEN
         sync: false
+      - key: ALCHEMY_API_KEY
+        sync: false
+      - key: HERMES_OPERATOR_TOKEN
+        sync: false
+      - key: WALLET_CONNECT_PROJECT_ID
+        sync: false
+      - key: HERMES_EXECUTION_AUTHORIZATION
+        value: "0"
+      - key: HERMES_LIVE_SIGNING
+        value: "false"
+      - key: HERMES_BROADCAST
+        value: "false"
+      - key: MIN_NET_PROFIT_USD
+        value: "2"
+      - key: TARGET_PROFIT_USD
+        value: "100"
+  - type: worker
+    name: flash-arb7-hermes-agent
+    runtime: node
+    plan: starter
+    rootDir: bot
+    buildCommand: npm ci
+    startCommand: npm run hermes:mcp
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: HERMES_MODE
+        value: IMPLEMENTATION
+      - key: HERMES_OPERATOR_TOKEN
+        sync: false
+      - key: ALCHEMY_API_KEY
+        sync: false
+      - key: HERMES_AGENT_ENDPOINT
+        sync: false
+      - key: GIT_SERVICE_TOKEN
+        sync: false
+      - key: HERMES_EXECUTION_AUTHORIZATION
+        value: "0"
+      - key: HERMES_LIVE_SIGNING
+        value: "false"
+      - key: HERMES_BROADCAST
+        value: "false"
