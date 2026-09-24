@@ -1,0 +1,2 @@
+import {NextResponse} from "next/server";
+export async function POST(req:Request){const expected=process.env.HERMES_OPERATOR_TOKEN;const supplied=req.headers.get("x-hermes-operator-token")||"";if(!expected||supplied!==expected)return NextResponse.json({ok:false,message:"Operator authentication required"}, {status:401});return NextResponse.json({ok:true,message:"Implementation control authorized for orchestration only; signing and broadcast remain separate gates."})}
