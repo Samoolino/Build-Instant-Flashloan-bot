@@ -11,7 +11,8 @@
     "hermes:control": "node src/hermes-control-server.mjs",
     "hermes:run": "source ../scripts/alchemy-rpc-env.sh && node src/hermes-agentic-run.mjs",
     "hermes:live": "node src/hermes-live-gateway.mjs",
-    "hermes:live:test": "node --test src/live-execution-pipeline.test.ts"
+    "hermes:live:test": "node --test src/live-execution-pipeline.test.ts",
+    "hermes:live-run": "source ../scripts/alchemy-rpc-env.sh && node src/hermes-live-run.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
