@@ -53,12 +53,12 @@ test("live corridor signs externally, broadcasts, waits for receipt and records 
   let receiptCalls = 0;
   const result = await executeLiveCorridor({
     rpc: {
-      request: async (method: string) => {
+      request: async <T>(method: string, _params: unknown[]): Promise<T> => {
         calls.push(method);
-        if (method === "eth_sendRawTransaction") return "0x" + "a".repeat(64);
+        if (method === "eth_sendRawTransaction") return ("0x" + "a".repeat(64)) as T;
         if (method === "eth_getTransactionReceipt") {
           receiptCalls += 1;
-          return { status: "0x1", transactionHash: "0x" + "a".repeat(64) };
+          return ({ status: "0x1", transactionHash: "0x" + "a".repeat(64) }) as T;
         }
         throw new Error("unexpected rpc");
       },
