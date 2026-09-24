@@ -9,7 +9,9 @@
     "hermes:mcp": "node --experimental-strip-types src/hermes-mcp.ts",
     "hermes:rpc": "source ../scripts/alchemy-rpc-env.sh && node src/hermes-rpc-bridge.mjs",
     "hermes:control": "node src/hermes-control-server.mjs",
-    "hermes:run": "source ../scripts/alchemy-rpc-env.sh && node src/hermes-agentic-run.mjs"
+    "hermes:run": "source ../scripts/alchemy-rpc-env.sh && node src/hermes-agentic-run.mjs",
+    "hermes:live": "node src/hermes-live-gateway.mjs",
+    "hermes:live:test": "node --test src/live-execution-pipeline.test.ts"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
