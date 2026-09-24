@@ -53,3 +53,59 @@ tmux attach -t flash-arb7-hermes
 ```
 
 The screen is deliberately an implementation/control console rather than an autonomous signer. It keeps signing disabled, broadcast disabled, and execution authorization at zero. Live implementation may therefore proceed through observation, quoting, simulation, audit and unsigned intent generation, while the final signing/broadcast boundary remains external.
+
+
+## Agentic run to live-funds readiness
+
+The agentic run is a staged state machine:
+
+1. **OBSERVE** — read live RPC health/block/gas state.
+2. **VERIFY** — reject missing or mismatched RPCs.
+3. **STRATEGIZE** — consume a verified opportunity produced by the strategy/quote adapters; Hermes does not invent profitability.
+4. **ECONOMICS** — require fresh quote, lender premium/repayment, gas and a verified net-profit calculation. The repository economic floor is currently USD 2 unless explicitly configured otherwise.
+5. **SIMULATE** — require a successful simulation against the relevant state.
+6. **EXECUTION_LOCKED** — bind the opportunity to its observation, plan hash and execution context.
+7. **UNSIGNED_INTENT** — construct transaction metadata for an external signer.
+8. **EXTERNAL_AUTH_REQUIRED** — stop before signing/broadcast.
+
+Run the coordinator with:
+
+```bash
+cd ~/Build-Instant-Flashloan-bot
+source scripts/alchemy-rpc-env.sh
+npm --prefix bot run hermes:run
+```
+
+A verified candidate can be supplied with `HERMES_CANDIDATE_JSON=/path/to/candidate.json`. The coordinator will reject candidates that fail the RPC, quote, economics or simulation gates.
+
+### Live-funds design
+
+The production path is intentionally split into two authorities:
+
+```text
+Hermes
+  -> observe
+  -> strategy
+  -> quote
+  -> lender economics
+  -> simulation
+  -> execution lock
+  -> unsigned intent
+                 |
+                 v
+        external authorization
+                 |
+                 v
+          signer / wallet
+                 |
+                 v
+            broadcaster
+                 |
+                 v
+         receipt verification
+                 |
+                 v
+          audit / feedback
+```
+
+Hermes therefore becomes the agentic board and control plane without becoming the holder of private keys. The first live-funds transaction should only be attempted after the unsigned intent has been independently reviewed and authorized by the configured signer boundary.
