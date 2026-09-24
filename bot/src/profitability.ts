@@ -1,5 +1,5 @@
 export const MINIMUM_NET_PROFIT_USD = 2;
-export const TARGET_PROFIT_USD = 100;
+export const TARGET_PROFIT_USD = 200;
 
 export type ProfitabilityDecision = {
   eligible: boolean;
