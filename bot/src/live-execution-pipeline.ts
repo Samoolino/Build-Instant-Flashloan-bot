@@ -142,7 +142,7 @@ export async function executeLiveCorridor(input: {
       predictedProfitUsd: input.predictedProfitUsd,
       realizedProfitUsd,
       varianceUsd,
-      status: realizedProfitUsd >= 2 ? "PROFIT_CONFIRMED" : "PROFIT_MISSED",
+      status: (realizedProfitUsd >= 2 ? "PROFIT_CONFIRMED" : "PROFIT_MISSED") as "PROFIT_CONFIRMED" | "PROFIT_MISSED",
     },
   });
 }
