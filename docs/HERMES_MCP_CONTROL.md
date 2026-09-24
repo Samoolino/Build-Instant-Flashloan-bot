@@ -109,3 +109,50 @@ Hermes
 ```
 
 Hermes therefore becomes the agentic board and control plane without becoming the holder of private keys. The first live-funds transaction should only be attempted after the unsigned intent has been independently reviewed and authorized by the configured signer boundary.
+
+
+## Full live execution corridor
+
+The repository now implements the complete software corridor after unsigned intent:
+
+```text
+UNSIGNED_INTENT
+  -> LIVE_STRATEGY_QUOTE
+  -> LIVE_ROUTE_SIMULATION
+  -> EXTERNAL_SIGNER
+  -> BROADCAST
+  -> RECEIPT
+  -> REALIZED_PROFIT
+  -> AGENTIC_FEEDBACK
+```
+
+The implementation is split into:
+- `bot/src/live-execution-pipeline.ts` — typed execution corridor, receipt verification and predicted-versus-realized feedback.
+- `bot/src/hermes-live-run.mjs` — executable live gateway using an external signer and configured broadcast RPC.
+- `bot/src/hermes-live-gateway.mjs` — minimal signer/broadcast adapter.
+- `docs/LIVE_AGENTIC_EXECUTION.md` — stage contracts and production gate.
+
+The live gateway requires explicit `HERMES_LIVE_EXECUTION=1` and `HERMES_BROADCAST=1`, an external signer endpoint/token, a broadcast RPC, and a valid unexpired intent. It fails closed otherwise.
+
+## Updated maturity map
+
+All lifecycle stages now have an implemented software contract:
+
+| Area | State |
+|---|---|
+| Configuration | 100% |
+| Multi-chain RPC observation | 100% |
+| Agentic board | 100% |
+| Economic validation | 100% |
+| Execution lock | 100% |
+| Unsigned intent | 100% |
+| Live strategy/quote adapter contract | 100% |
+| Live route simulation adapter contract | 100% |
+| External signer boundary | 100% |
+| Broadcast boundary | 100% |
+| Receipt verification | 100% |
+| Realized-profit observer contract | 100% |
+| Agentic feedback | 100% |
+| Persistent Hermes control screen | 100% |
+
+These percentages describe implementation coverage of the lifecycle contracts and gates. They do not assert that a funded wallet, external signer service, live strategy venue, or live transaction is currently online. Actual operational uptime remains an environment/runtime property and must be monitored separately.
